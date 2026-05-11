@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -28,7 +28,6 @@ const Login: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [step, setStep] = useState<'auth' | 'otp'>('auth');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [authData, setAuthData] = useState<{ token: string; user: any } | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -39,6 +38,16 @@ const Login: React.FC = () => {
   const brandInfo = isSimulation && BRAND_STYLES[brandParam] 
     ? BRAND_STYLES[brandParam] 
     : { logo: '', name: 'Stripee', color: '#0A2540', bgColor: 'bg-[#0A2540]/10' };
+
+  useEffect(() => {
+    if (step === 'otp') {
+      // Small timeout to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        document.getElementById('otp-0')?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,7 +257,8 @@ const Login: React.FC = () => {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="w-12 h-14 text-center text-2xl font-bold bg-[#F6F9FC] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00dc82]/50 focus:border-[#00dc82] transition-all"
+                      className="w-12 h-14 text-center text-2xl font-bold bg-[#F6F9FC] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all"
+                      style={{ '--tw-ring-color': `${brandInfo.color}80`, borderColor: digit ? brandInfo.color : undefined } as any}
                       maxLength={1}
                     />
                   ))}
@@ -259,7 +269,11 @@ const Login: React.FC = () => {
               {success && <div className="text-[#00dc82] text-xs font-bold bg-[#00dc82]/10 p-3 rounded-lg border border-[#00dc82]/20 text-center">{success}</div>}
 
               <div className="space-y-4">
-                <button type="submit" className="w-full bg-[#0A2540] text-white py-3 rounded-lg font-bold hover:bg-[#425466] transition-all flex items-center justify-center gap-2 group">
+                <button 
+                  type="submit" 
+                  className="w-full text-white py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                  style={{ backgroundColor: brandInfo.color }}
+                >
                   Verify Code
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
